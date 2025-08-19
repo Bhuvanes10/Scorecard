@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Advanced Cricket Scorecard</title>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f2f7fb; margin: 0; padding: 20px; }
+  .container { max-width: 1000px; margin: auto; background: #ffffff; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+  h1 { text-align: center; color: #333; margin-bottom: 20px; }
+  .team { margin-bottom: 30px; }
+  .team h2 { color: #444; }
+  input[type=text] { padding: 8px; width: 180px; border-radius: 8px; border: 1px solid #ccc; margin-right: 8px; }
+  .batters { display: flex; flex-wrap: wrap; margin-top: 10px; }
+  .batsman { background: linear-gradient(135deg, #6a11cb, #2575fc); color: white; padding: 10px 15px; margin: 5px; border-radius: 12px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; text-align: center; min-width: 120px; }
+  .batsman.active { box-shadow: 0 0 15px 3px #28a745; transform: scale(1.05); }
+  .batsman:hover { transform: scale(1.05); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+  .controls { margin: 20px 0; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+  .controls button { padding: 12px 18px; border-radius: 10px; border: none; color: #fff; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: 0.2s; }
+  .controls button:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+  .runs { background: linear-gradient(45deg, #ff512f, #dd2476); }
+  .wicket { background: linear-gradient(45deg, #f7971e, #ffd200); }
+  .extra { background: linear-gradient(45deg, #11998e, #38ef7d); }
+  .scoreboard { margin-top: 30px; }
+  table { width: 100%; border-collapse: collapse; border-radius: 10px; overflow: hidden; }
+  th, td { padding: 12px; text-align: center; border-bottom: 1px solid #ddd; }
+  th { background: #007bff; color: white; }
+  td { background: #f9f9f9; }
+  .innings { text-align: center; font-size: 18px; margin: 10px 0; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Advanced Cricket Scorecard</h1>
+
+  <div class="innings" id="inningDisplay">Inning 1 - Batting: Team 1</div>
+
+  <div class="team" id="team1">
+    <h2>Team 1</h2>
+    <input type="text" id="team1Batsman" placeholder="Batsman Name">
+    <button onclick="addBatsman('team1')"><i class="fa fa-plus"></i> Add</button>
+    <div class="batters" id="team1Batters"></div>
+  </div>
+
+  <div class="team" id="team2">
+    <h2>Team 2</h2>
+    <input type="text" id="team2Batsman" placeholder="Batsman Name">
+    <button onclick="addBatsman('team2')"><i class="fa fa-plus"></i> Add</button>
+    <div class="batters" id="team2Batters"></div>
+  </div>
+
+  <div class="controls">
+    <button class="runs" onclick="addRuns(1)">1 <i class="fa fa-futbol"></i></button>
+    <button class="runs" onclick="addRuns(2)">2 <i class="fa fa-futbol"></i></button>
+    <button class="runs" onclick="addRuns(3)">3 <i class="fa fa-futbol"></i></button>
+    <button class="runs" onclick="addRuns(4)">4 <i class="fa fa-bolt"></i></button>
+    <button class="runs" onclick="addRuns(6)">6 <i class="fa fa-bolt"></i></button>
+    <button class="wicket" onclick="addWicket()"><i class="fa fa-skull-crossbones"></i> Wicket</button>
+    <button class="extra" onclick="addExtra('WD')">Wide <i class="fa fa-arrow-right"></i></button>
+    <button class="extra" onclick="addExtra('NB')">No Ball <i class="fa fa-arrow-up"></i></button>
+    <button class="extra" onclick="nextInning()">Next Inning <i class="fa fa-forward"></i></button>
+  </div>
+
+  <div class="scoreboard" id="scoreboard"></div>
+  <div class="innings-info" id="inningInfo" style="margin-top: 15px; text-align:center; font-size:16px;"></div>
+</div>
+
+<script>
+let totalOvers = parseInt(prompt("Enter total overs for the match:", "6")) || 6;
+let teams = { team1: [], team2: [] };
+let activeBatsman = { team1: null, team2: null };
+let extras = { team1: { WD:0, NB:0 }, team2: { WD:0, NB:0 } };
+let balls = { team1:0, team2:0 };
+let wickets = { team1:0, team2:0 };
+let currentTeam = 'team1';
+let inning = 1;
+let target = 0;
+
+function addBatsman(team) {
+  const input = document.getElementById(`${team}Batsman`);
+  if(input.value.trim() !== '') {
+    const batsman = { name: input.value.trim(), runs:0, balls:0, out:false };
+    teams[team].push(batsman);
+    if(activeBatsman[team]===null) activeBatsman[team] = 0;
+    input.value='';
+    renderBatsmen(team);
+  }
+}
+
+function renderBatsmen(team) {
+  const container = document.getElementById(`${team}Batters`);
+  container.innerHTML = '';
+  teams[team].forEach((b,index)=>{
+    const div = document.createElement('div');
+    div.textContent = b.name + (b.out?' (OUT)':'');
+    div.className = 'batsman'+(activeBatsman[team]===index?' active':'');
+    div.onclick = ()=>{activeBatsman[team]=index; renderBatsmen(team);}
+    container.appendChild(div);
+  });
+  renderScoreboard();
+}
+
+function addRuns(r) {
+  if(activeBatsman[currentTeam]===null) return alert('Select a batsman first!');
+  const b = teams[currentTeam][activeBatsman[currentTeam]];
+  b.runs += r;
+  b.balls +=1;
+  balls[currentTeam]+=1;
+  rotateStrike(r);
+  checkEndInning();
+  renderBatsmen(currentTeam);
+}
+
+function addWicket() {
+  if(activeBatsman[currentTeam]===null) return alert('Select a batsman first!');
+  const b = teams[currentTeam][activeBatsman[currentTeam]];
+  b.out = true;
+  b.balls +=1;
+  balls[currentTeam]+=1;
+  wickets[currentTeam]+=1;
+  activeBatsman[currentTeam] = nextAvailableBatsman(currentTeam);
+  checkEndInning();
+  renderBatsmen(currentTeam);
+}
+
+function addExtra(type) {
+  extras[currentTeam][type]+=1;
+  alert(type+' added!');
+  renderScoreboard();
+}
+
+function rotateStrike(runs){
+  if(runs%2!==0){ // odd runs => change striker
+    let others = teams[currentTeam].map((b,i)=>i).filter(i=>i!==activeBatsman[currentTeam] && !teams[currentTeam][i].out);
+    if(others.length>0) activeBatsman[currentTeam]=others[0];
+  }
+}
+
+function nextAvailableBatsman(team){
+  for(let i=0;i<teams[team].length;i++){
+    if(!teams[team][i].out && i!==activeBatsman[team]) return i;
+  }
+  return null;
+}
+
+function nextInning(){
+  if(inning===1){
+    target = getTeamScore('team1')+1;
+    inning=2;
+    currentTeam='team2';
+    document.getElementById('inningDisplay').innerText='Inning 2 - Batting: Team 2';
+    alert('Target for Team 2: '+target+' runs');
+  }else{
+    alert('Match finished!');
+  }
+  renderScoreboard();
+}
+
+function getTeamScore(team){
+  return teams[team].reduce((a,b)=>a+b.runs,0)+extras[team].WD+extras[team].NB;
+}
+
+function getBallsRemaining(){
+  return totalOvers*6 - balls[currentTeam];
+}
+
+function checkEndInning(){
+  if(balls[currentTeam]>=totalOvers*6 || activeBatsman[currentTeam]===null){
+    alert(`Inning ${inning} over!`);
+    if(inning===1) nextInning();
+  }
+}
+
+function renderScoreboard(){
+  const board = document.getElementById('scoreboard');
+  board.innerHTML='';
+  for(const team in teams){
+    let html=`<h3>${team.toUpperCase()} - Total: ${getTeamScore(team)}/${wickets[team]} | Overs: ${Math.floor(balls[team]/6)}.${balls[team]%6}</h3>`;
+    html+=`<table><tr><th>Batsman</th><th>Runs</th><th>Balls</th><th>Status</th></tr>`;
+    teams[team].forEach(b=>{
+      html+=`<tr><td>${b.name}</td><td>${b.runs}</td><td>${b.balls}</td><td>${b.out?'OUT':'Not Out'}</td></tr>`;
+    });
+    html+=`</table>`;
+    html+=`<p>Extras: WD ${extras[team].WD}, NB ${extras[team].NB}</p>`;
+    board.innerHTML+=html;
+  }
+  if(inning===2){
+    const runsNeeded = target-getTeamScore('team2');
+    const ballsLeft = getBallsRemaining();
+    document.getElementById('inningInfo').innerText=`Team 2 needs ${runsNeeded} runs from ${ballsLeft} balls`;
+  }
+}
+</script>
+</body>
+</html>
