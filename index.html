@@ -3,192 +3,199 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Advanced Cricket Scorecard</title>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<title>Cricket Scoreboard</title>
 <style>
-  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f2f7fb; margin: 0; padding: 20px; }
-  .container { max-width: 1000px; margin: auto; background: #ffffff; padding: 25px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-  h1 { text-align: center; color: #333; margin-bottom: 20px; }
-  .team { margin-bottom: 30px; }
-  .team h2 { color: #444; }
-  input[type=text] { padding: 8px; width: 180px; border-radius: 8px; border: 1px solid #ccc; margin-right: 8px; }
-  .batters { display: flex; flex-wrap: wrap; margin-top: 10px; }
-  .batsman { background: linear-gradient(135deg, #6a11cb, #2575fc); color: white; padding: 10px 15px; margin: 5px; border-radius: 12px; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: transform 0.2s, box-shadow 0.2s; text-align: center; min-width: 120px; }
-  .batsman.active { box-shadow: 0 0 15px 3px #28a745; transform: scale(1.05); }
-  .batsman:hover { transform: scale(1.05); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
-  .controls { margin: 20px 0; display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-  .controls button { padding: 12px 18px; border-radius: 10px; border: none; color: #fff; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: 0.2s; }
-  .controls button:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
-  .runs { background: linear-gradient(45deg, #ff512f, #dd2476); }
-  .wicket { background: linear-gradient(45deg, #f7971e, #ffd200); }
-  .extra { background: linear-gradient(45deg, #11998e, #38ef7d); }
-  .scoreboard { margin-top: 30px; }
-  table { width: 100%; border-collapse: collapse; border-radius: 10px; overflow: hidden; }
-  th, td { padding: 12px; text-align: center; border-bottom: 1px solid #ddd; }
-  th { background: #007bff; color: white; }
-  td { background: #f9f9f9; }
-  .innings { text-align: center; font-size: 18px; margin: 10px 0; }
+  body { font-family: Arial, sans-serif; background:#f4f4f4; margin:0; padding:20px;}
+  .container { max-width: 1000px; margin:auto; background:#fff; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.1);}
+  h1,h2,h3 { text-align:center; }
+  input[type=text]{padding:8px;margin-right:5px;}
+  button{padding:8px 15px; margin:5px; border:none; border-radius:6px; background:#007bff; color:#fff; cursor:pointer;}
+  button:hover{background:#0056b3;}
+  .section{margin-bottom:20px;}
+  .batters,.squad{display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;}
+  .player{padding:8px 12px; background:#eee; border-radius:6px; cursor:pointer;}
+  .active{background:#28a745; color:#fff;}
+  .out{background:#dc3545; color:#fff;}
+  table{width:100%; border-collapse:collapse; margin-top:10px;}
+  th,td{padding:10px; border:1px solid #ddd; text-align:center;}
 </style>
 </head>
 <body>
 <div class="container">
-  <h1>Advanced Cricket Scorecard</h1>
-
-  <div class="innings" id="inningDisplay">Inning 1 - Batting: Team 1</div>
-
-  <div class="team" id="team1">
-    <h2>Team 1</h2>
-    <input type="text" id="team1Batsman" placeholder="Batsman Name">
-    <button onclick="addBatsman('team1')"><i class="fa fa-plus"></i> Add</button>
-    <div class="batters" id="team1Batters"></div>
+  <h1>Cricket Scoreboard</h1>
+  
+  <div class="section">
+    <h2>Team 1 Squad</h2>
+    <input type="text" id="team1Input" placeholder="Enter player name">
+    <button onclick="addToSquad('team1')">Add Player</button>
+    <div class="squad" id="team1Squad"></div>
   </div>
 
-  <div class="team" id="team2">
-    <h2>Team 2</h2>
-    <input type="text" id="team2Batsman" placeholder="Batsman Name">
-    <button onclick="addBatsman('team2')"><i class="fa fa-plus"></i> Add</button>
-    <div class="batters" id="team2Batters"></div>
+  <div class="section">
+    <h2>Team 2 Squad</h2>
+    <input type="text" id="team2Input" placeholder="Enter player name">
+    <button onclick="addToSquad('team2')">Add Player</button>
+    <div class="squad" id="team2Squad"></div>
   </div>
 
-  <div class="controls">
-    <button class="runs" onclick="addRuns(1)">1 <i class="fa fa-futbol"></i></button>
-    <button class="runs" onclick="addRuns(2)">2 <i class="fa fa-futbol"></i></button>
-    <button class="runs" onclick="addRuns(3)">3 <i class="fa fa-futbol"></i></button>
-    <button class="runs" onclick="addRuns(4)">4 <i class="fa fa-bolt"></i></button>
-    <button class="runs" onclick="addRuns(6)">6 <i class="fa fa-bolt"></i></button>
-    <button class="wicket" onclick="addWicket()"><i class="fa fa-skull-crossbones"></i> Wicket</button>
-    <button class="extra" onclick="addExtra('WD')">Wide <i class="fa fa-arrow-right"></i></button>
-    <button class="extra" onclick="addExtra('NB')">No Ball <i class="fa fa-arrow-up"></i></button>
-    <button class="extra" onclick="nextInning()">Next Inning <i class="fa fa-forward"></i></button>
+  <div class="section">
+    <h2>Controls</h2>
+    <button onclick="addRuns(0)">Dot</button>
+    <button onclick="addRuns(1)">1</button>
+    <button onclick="addRuns(2)">2</button>
+    <button onclick="addRuns(3)">3</button>
+    <button onclick="addRuns(4)">4</button>
+    <button onclick="addRuns(6)">6</button>
+    <button onclick="addWicket()">Wicket</button>
+    <button onclick="addExtra('WD')">Wide</button>
+    <button onclick="addExtra('NB')">No Ball</button>
+    <button onclick="toggleRunner()">Toggle Runner</button>
+    <button onclick="nextInning()">Next Inning</button>
   </div>
 
-  <div class="scoreboard" id="scoreboard"></div>
-  <div class="innings-info" id="inningInfo" style="margin-top: 15px; text-align:center; font-size:16px;"></div>
+  <h3 id="inningDisplay">Inning 1 - Team 1 Batting</h3>
+  <div class="batters" id="activeBatters"></div>
+
+  <div id="scoreboard"></div>
 </div>
 
 <script>
-let totalOvers = parseInt(prompt("Enter total overs for the match:", "6")) || 6;
-let teams = { team1: [], team2: [] };
-let activeBatsman = { team1: null, team2: null };
-let extras = { team1: { WD:0, NB:0 }, team2: { WD:0, NB:0 } };
-let balls = { team1:0, team2:0 };
-let wickets = { team1:0, team2:0 };
-let currentTeam = 'team1';
+let totalOvers = 6;
 let inning = 1;
-let target = 0;
+let currentTeam = 'team1';
+let squads = { team1:[], team2:[] };
+let activeBatters = { team1:[], team2:[] };
+let score = { team1:{runs:0,wkts:0,balls:0,WD:0,NB:0}, team2:{runs:0,wkts:0,balls:0,WD:0,NB:0}};
+let runnerMode = false;
+let target = null;
 
-function addBatsman(team) {
-  const input = document.getElementById(`${team}Batsman`);
-  if(input.value.trim() !== '') {
-    const batsman = { name: input.value.trim(), runs:0, balls:0, out:false };
-    teams[team].push(batsman);
-    if(activeBatsman[team]===null) activeBatsman[team] = 0;
-    input.value='';
-    renderBatsmen(team);
+function addToSquad(team){
+  let input=document.getElementById(team+"Input");
+  if(input.value.trim()!==""){
+    squads[team].push({name:input.value.trim(),runs:0,balls:0,out:false});
+    input.value="";
+    renderSquad(team);
   }
 }
 
-function renderBatsmen(team) {
-  const container = document.getElementById(`${team}Batters`);
-  container.innerHTML = '';
-  teams[team].forEach((b,index)=>{
-    const div = document.createElement('div');
-    div.textContent = b.name + (b.out?' (OUT)':'');
-    div.className = 'batsman'+(activeBatsman[team]===index?' active':'');
-    div.onclick = ()=>{activeBatsman[team]=index; renderBatsmen(team);}
-    container.appendChild(div);
+function renderSquad(team){
+  let div=document.getElementById(team+"Squad");
+  div.innerHTML="";
+  squads[team].forEach((p,i)=>{
+    let d=document.createElement("div");
+    d.className="player "+(p.out?"out":"");
+    d.textContent=p.name;
+    d.onclick=()=>selectBatsman(team,i);
+    div.appendChild(d);
+  });
+  renderActiveBatters();
+}
+
+function selectBatsman(team,index){
+  if(activeBatters[team].length<2 && !squads[team][index].out){
+    activeBatters[team].push(index);
+    renderActiveBatters();
+  }
+}
+
+function renderActiveBatters(){
+  let div=document.getElementById("activeBatters");
+  div.innerHTML="";
+  activeBatters[currentTeam].forEach(i=>{
+    let p=squads[currentTeam][i];
+    let d=document.createElement("div");
+    d.className="player active";
+    d.textContent=p.name+" ("+p.runs+" runs, "+p.balls+" balls)";
+    div.appendChild(d);
   });
   renderScoreboard();
 }
 
-function addRuns(r) {
-  if(activeBatsman[currentTeam]===null) return alert('Select a batsman first!');
-  const b = teams[currentTeam][activeBatsman[currentTeam]];
-  b.runs += r;
-  b.balls +=1;
-  balls[currentTeam]+=1;
-  rotateStrike(r);
-  checkEndInning();
-  renderBatsmen(currentTeam);
+function addRuns(r){
+  if(activeBatters[currentTeam].length<1) return alert("Select batsmen first!");
+  let striker=squads[currentTeam][activeBatters[currentTeam][0]];
+  if(!runnerMode){ // runs go to striker
+    striker.runs+=r;
+    striker.balls+=1;
+  }else{ // runner mode, runs only to team
+    striker.balls+=1;
+  }
+  score[currentTeam].runs+=r;
+  score[currentTeam].balls+=1;
+  if(r%2!==0) swapStrike();
+  checkEnd();
+  renderActiveBatters();
 }
 
-function addWicket() {
-  if(activeBatsman[currentTeam]===null) return alert('Select a batsman first!');
-  const b = teams[currentTeam][activeBatsman[currentTeam]];
-  b.out = true;
-  b.balls +=1;
-  balls[currentTeam]+=1;
-  wickets[currentTeam]+=1;
-  activeBatsman[currentTeam] = nextAvailableBatsman(currentTeam);
-  checkEndInning();
-  renderBatsmen(currentTeam);
+function addWicket(){
+  if(activeBatters[currentTeam].length<1) return;
+  let strikerIndex=activeBatters[currentTeam][0];
+  squads[currentTeam][strikerIndex].out=true;
+  squads[currentTeam][strikerIndex].balls+=1;
+  score[currentTeam].balls+=1;
+  score[currentTeam].wkts+=1;
+  activeBatters[currentTeam].shift(); // remove striker
+  checkEnd();
+  renderSquad(currentTeam);
 }
 
-function addExtra(type) {
-  extras[currentTeam][type]+=1;
-  alert(type+' added!');
+function addExtra(type){
+  score[currentTeam][type]+=1;
+  score[currentTeam].runs+=1;
+  // no ball faced counted
   renderScoreboard();
 }
 
-function rotateStrike(runs){
-  if(runs%2!==0){ // odd runs => change striker
-    let others = teams[currentTeam].map((b,i)=>i).filter(i=>i!==activeBatsman[currentTeam] && !teams[currentTeam][i].out);
-    if(others.length>0) activeBatsman[currentTeam]=others[0];
+function swapStrike(){
+  if(activeBatters[currentTeam].length===2){
+    [activeBatters[currentTeam][0],activeBatters[currentTeam][1]]=
+    [activeBatters[currentTeam][1],activeBatters[currentTeam][0]];
   }
 }
 
-function nextAvailableBatsman(team){
-  for(let i=0;i<teams[team].length;i++){
-    if(!teams[team][i].out && i!==activeBatsman[team]) return i;
-  }
-  return null;
+function toggleRunner(){
+  runnerMode=!runnerMode;
+  alert("Runner Mode: "+(runnerMode?"ON":"OFF"));
 }
 
 function nextInning(){
   if(inning===1){
-    target = getTeamScore('team1')+1;
+    target=score.team1.runs+1;
     inning=2;
-    currentTeam='team2';
-    document.getElementById('inningDisplay').innerText='Inning 2 - Batting: Team 2';
-    alert('Target for Team 2: '+target+' runs');
+    currentTeam="team2";
+    document.getElementById("inningDisplay").innerText="Inning 2 - Team 2 Batting (Target "+target+")";
   }else{
-    alert('Match finished!');
+    alert("Match Finished!");
   }
   renderScoreboard();
 }
 
-function getTeamScore(team){
-  return teams[team].reduce((a,b)=>a+b.runs,0)+extras[team].WD+extras[team].NB;
-}
+function getOvers(balls){return Math.floor(balls/6)+"."+(balls%6);}
 
-function getBallsRemaining(){
-  return totalOvers*6 - balls[currentTeam];
-}
-
-function checkEndInning(){
-  if(balls[currentTeam]>=totalOvers*6 || activeBatsman[currentTeam]===null){
-    alert(`Inning ${inning} over!`);
+function checkEnd(){
+  if(score[currentTeam].balls>=totalOvers*6 || activeBatters[currentTeam].length===0){
+    alert("Inning over!");
     if(inning===1) nextInning();
   }
 }
 
 function renderScoreboard(){
-  const board = document.getElementById('scoreboard');
-  board.innerHTML='';
-  for(const team in teams){
-    let html=`<h3>${team.toUpperCase()} - Total: ${getTeamScore(team)}/${wickets[team]} | Overs: ${Math.floor(balls[team]/6)}.${balls[team]%6}</h3>`;
-    html+=`<table><tr><th>Batsman</th><th>Runs</th><th>Balls</th><th>Status</th></tr>`;
-    teams[team].forEach(b=>{
-      html+=`<tr><td>${b.name}</td><td>${b.runs}</td><td>${b.balls}</td><td>${b.out?'OUT':'Not Out'}</td></tr>`;
+  let div=document.getElementById("scoreboard");
+  div.innerHTML="";
+  for(let t in squads){
+    let s=score[t];
+    div.innerHTML+=`<h3>${t.toUpperCase()} - ${s.runs}/${s.wkts} in ${getOvers(s.balls)} overs</h3>`;
+    let table="<table><tr><th>Batsman</th><th>Runs</th><th>Balls</th><th>Status</th></tr>";
+    squads[t].forEach(p=>{
+      table+=`<tr><td>${p.name}</td><td>${p.runs}</td><td>${p.balls}</td><td>${p.out?"Out":"Not Out"}</td></tr>`;
     });
-    html+=`</table>`;
-    html+=`<p>Extras: WD ${extras[team].WD}, NB ${extras[team].NB}</p>`;
-    board.innerHTML+=html;
+    table+="</table>";
+    div.innerHTML+=table+`<p>Extras: WD ${s.WD}, NB ${s.NB}</p>`;
   }
-  if(inning===2){
-    const runsNeeded = target-getTeamScore('team2');
-    const ballsLeft = getBallsRemaining();
-    document.getElementById('inningInfo').innerText=`Team 2 needs ${runsNeeded} runs from ${ballsLeft} balls`;
+  if(inning===2 && target!==null){
+    let runsNeeded=target-score.team2.runs;
+    let ballsLeft=totalOvers*6-score.team2.balls;
+    div.innerHTML+=`<h3>Team 2 needs ${runsNeeded} runs in ${ballsLeft} balls</h3>`;
   }
 }
 </script>
